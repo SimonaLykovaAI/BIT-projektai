@@ -1,30 +1,25 @@
 import os
 import sys
 from dotenv import load_dotenv
-from google import genai
+import google.generativeai as genai
 
-# Įkraunam API raktus iš .env failo
+# 🔹 Įkeliame API raktą iš .env failo
 load_dotenv()
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# Gauk API raktą
-api_key = os.getenv("GOOGLE_API_KEY")
-
-# Inicijuojam Gemini klientą
-client = genai.Client(api_key=api_key)
-
+# 🔹 Sukuriame funkciją kelionės planui sugeneruoti
 def plan_trip(destination, days):
     """Sugeneruoja kelionės planą su Gemini AI"""
-    prompt = f"Sukurk {days}-dienų kelionės planą į {destination}. " \
-             f"Įtrauk lankytinas vietas, vietinį maistą, poilsio ir kultūros rekomendacijas."
-
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=prompt
+    prompt = (
+        f"Sukurk {days}-dienų kelionės planą į {destination}. "
+        "Įtrauk lankytinas vietas, vietinį maistą, poilsio ir kultūros rekomendacijas."
     )
 
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(prompt)
     return response.text
 
-# Pagrindinė dalis
+# 🔹 Pagrindinė dalis
 if __name__ == "__main__":
     if len(sys.argv) >= 3:
         dest = sys.argv[1]
@@ -33,6 +28,6 @@ if __name__ == "__main__":
         dest = input("Kur keliaujam? ")
         days = int(input("Kiek dienų? "))
 
-    print("\n=== Kelionės planas ===\n")
+    print("\n--- Kelionės planas ---\n")
     itinerary = plan_trip(dest, days)
     print(itinerary)
